@@ -77,12 +77,48 @@ class ComputerPlayer(Player):
         Choice = random.choice(choice)
         self.letter = Choice
 
-class AIplayer(Player):
+
+class AIPlayer(Player):
     def __init__(self, letter):
         super().__init__(letter)
 
-    def get_move(self,game):
-      possible_moves = [x for x, letter in enumerate(self.board)]
+    def get_move(self, game):
+        possible_moves = [i for i, spot in enumerate(game.board) if spot == "_"]
+
+
+        for move in possible_moves:
+            game.board[move] = self.letter
+            if game.is_win():
+                game.board[move] = "_"
+                game.update_board(move, self.letter)
+                return
+            game.board[move] = "_"
+
+
+        opponent = "O" if self.letter == "X" else "X"
+        for move in possible_moves:
+            game.board[move] = opponent
+            if game.is_win():
+                game.board[move] = "_"
+                game.update_board(move, self.letter)
+                return
+            game.board[move] = "_"
+
+
+        if 4 in possible_moves:
+            game.update_board(4, self.letter)
+            return
+
+
+        corners = [i for i in [0, 2, 6, 8] if i in possible_moves]
+        if corners:
+            move = random.choice(corners)
+            game.update_board(move, self.letter)
+            return
+
+        move = random.choice(possible_moves)
+        game.update_board(move, self.letter)
+
 
     def get_choice(self):
         Choice = random.choice(choice)
@@ -109,30 +145,34 @@ class HumanPlayer(Player):
             self.letter = "X"
         return self.letter
 
+
+
 if __name__ == "__main__":
     print("Welcome to TicTacToe: ")
     tic = TicTacToe()
 
-
-    computer = ComputerPlayer("O")
+    ai = AIPlayer("O")
     human = HumanPlayer("X")
 
     tic.print_board()
 
     while True:
+
         human.get_move(tic)
+
         if tic.is_win():
-            print("You Win!")
-            tic.print_board()
-            break
-        computer.get_move(tic)
-        tic.print_board()
-        if tic.is_win():
-            print("Computer wins!")
-            tic.print_board()
+            print("Human wins!")
             break
         if tic.is_draw():
-            print("Its a draw!")
+            print("It's a draw!")
             break
 
+        ai.get_move(tic)
+        tic.print_board()
+        if tic.is_win():
+            print("AI wins!")
+            break
+        if tic.is_draw():
+            print("It's a draw!")
+            break
 
